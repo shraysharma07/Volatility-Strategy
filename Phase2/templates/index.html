@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Volatility Strategy Backtest</title>
+</head>
+<body>
+    <h1>Volatility Strategy Backtest</h1>
+
+    <form method="post">
+        Symbols (comma separated): <input type="text" name="symbols" placeholder="SPY,^GSPC,^VIX" required><br>
+        Trade Symbol: <input type="text" name="trade_symbol" placeholder="SPY" required><br>
+        Volatility Symbol: <input type="text" name="volatility_symbol" placeholder="^VIX" required><br>
+        Benchmark Symbol: <input type="text" name="benchmark_symbol" placeholder="^GSPC" required><br>
+        Start Date (YYYY-MM-DD): <input type="text" name="start_date" placeholder="2020-01-01" required><br>
+        End Date (YYYY-MM-DD): <input type="text" name="end_date" placeholder="2021-01-01"><br>
+        Volatility Threshold: <input type="text" name="volatility_threshold" value="20"><br>
+        Capital: <input type="text" name="capital" value="10000"><br>
+        <button type="submit">Run Analysis</button>
+    </form>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    {% if plot_path %}
+        <h2>Results:</h2>
+        <img src="{{ plot_path }}" alt="Result Plot">
+    {% endif %}
+
+    {% if metrics %}
+        <h3>Summary:</h3>
+        <ul>
+        {% for key, value in metrics.items() %}
+            <li>{{ key }}: {{ value }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

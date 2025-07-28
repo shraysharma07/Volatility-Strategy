@@ -51,9 +51,6 @@ Strategy parameters, such as volatility threshold, symbols, and capital, can be 
   volatility_threshold = 25   # VIX level 
   capital = 50000   # Portfolio size
   symbols = ['QQQ', '^IXIC', '^VIX']   # Ticker symbols to fetch data for
-  ``` 
+  ```
   `start_date` and `end_date` can also be modified to experiment with multiple market cycles 
 
-  # Work In Progress
-
- This week, it took me 13-14 hours to build the barebones of the Flask website for our volatility-based trading strategy. The app now takes in ticker symbols, a trade symbol, and a volatility threshold from the user, and it runs the basic backtest logic based on those inputs. We also connected the frontend to the backend so everything runs smoothly from one form submission. The core functionality is there, and now the next step is to clean it up by refining the layout, making the results more readable, and eventually adding visualizations and performance stats to give a clearer picture of how the strategy is doing.

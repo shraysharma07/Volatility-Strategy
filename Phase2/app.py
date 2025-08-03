@@ -1,62 +1,62 @@
+from flask import Flask, request, render_template, send_file
+from backtest_utils import run_backtest, BacktestError
 import io
-import base64
-from flask import Flask, render_template, request
 import matplotlib.pyplot as plt
-from backtest_utils import backtest_strategy
 
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    error = None
-    plot_data = None
     stats = None
+    error = None
+    plot_url = None
 
     if request.method == 'POST':
-        symbols = request.form.get('symbols', '').strip()
-        start_date = request.form.get('start_date', '').strip()
-        end_date = request.form.get('end_date', '').strip()
-        threshold = request.form.get('threshold', '').strip()
-        capital = request.form.get('capital', '').strip()
+        try:
+            trade_symbol = request.form.get('trade_symbol', '').strip()
+            vol_symbol = request.form.get('vol_symbol', '').strip()
+            start_date = request.form.get('start_date', '').strip()
+            end_date = request.form.get('end_date', '').strip()
+            vol_threshold = float(request.form.get('vol_threshold', 0))
+            initial_capital = float(request.form.get('initial_capital', 0))
 
-        if not symbols or not start_date or not end_date or not threshold or not capital:
-            error = "Please fill in all fields."
-        else:
-            symbols_list = [s.strip() for s in symbols.split(',')]
-            try:
-                threshold = float(threshold)
-                capital = float(capital)
-            except ValueError:
-                error = "Threshold and Capital must be valid numbers."
-            
-            if not error:
-                try:
-                    # Run the backtest with the first symbol as trade_symbol for demo
-                    trade_symbol = symbols_list[0]
+            if not all([trade_symbol, vol_symbol, start_date, end_date]):
+                raise BacktestError("Please fill in all fields.")
 
-                    result = backtest_strategy(
-                        symbols_list,
-                        trade_symbol,
-                        start_date,
-                        end_date,
-                        threshold,
-                        capital
-                    )
+            config = {
+                "symbols": {
+                    "trade": trade_symbol,
+                    "volatility": vol_symbol
+                },
+                "start_date": start_date,
+                "end_date": end_date,
+                "vol_threshold": vol_threshold,
+                "initial_capital": initial_capital
+            }
 
-                    fig = result['plot']
-                    stats = result['stats']
+            result = run_backtest(config)
+            stats = result['stats']
 
-                    # Convert plot to base64 string to embed in HTML
-                    img = io.BytesIO()
-                    fig.savefig(img, format='png', bbox_inches='tight')
-                    plt.close(fig)
-                    img.seek(0)
-                    plot_data = base64.b64encode(img.getvalue()).decode()
+            buf = io.BytesIO()
+            result['plot'].savefig(buf, format='png')
+            buf.seek(0)
+            plot_url = '/plot.png'
+            plt.close(result['plot'])
+            app.config['PLOT_IMAGE'] = buf
 
-                except Exception as e:
-                    error = f"Error during backtest: {str(e)}"
+        except BacktestError as be:
+            error = str(be)
+        except Exception as e:
+            error = f"Unexpected error: {e}"
 
-    return render_template('index.html', error=error, plot_data=plot_data, stats=stats)
+    return render_template('index.html', stats=stats, error=error, plot_url=plot_url)
+
+@app.route('/plot.png')
+def plot_png():
+    buf = app.config.get('PLOT_IMAGE')
+    if buf:
+        return send_file(buf, mimetype='image/png')
+    return "No plot available."
 
 if __name__ == '__main__':
     app.run(debug=True)

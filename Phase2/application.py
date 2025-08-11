@@ -1,11 +1,11 @@
 from flask import Flask, request, render_template, send_file
-from backtest_utils import run_backtest, BacktestError
+from .backtest_utils import run_backtest, BacktestError
 import io
 import matplotlib.pyplot as plt
 
-app = Flask(__name__)
+application = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
+@application.route('/', methods=['GET', 'POST'])
 def index():
     stats = None
     error = None
@@ -42,7 +42,7 @@ def index():
             buf.seek(0)
             plot_url = '/plot.png'
             plt.close(result['plot'])
-            app.config['PLOT_IMAGE'] = buf
+            application.config['PLOT_IMAGE'] = buf
 
         except BacktestError as be:
             error = str(be)
@@ -51,12 +51,12 @@ def index():
 
     return render_template('index.html', stats=stats, error=error, plot_url=plot_url)
 
-@app.route('/plot.png')
+@application.route('/plot.png')
 def plot_png():
-    buf = app.config.get('PLOT_IMAGE')
+    buf = application.config.get('PLOT_IMAGE')
     if buf:
         return send_file(buf, mimetype='image/png')
     return "No plot available."
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    application.run(debug=True)

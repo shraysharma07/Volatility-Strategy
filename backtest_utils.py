@@ -5,16 +5,12 @@ import matplotlib.pyplot as plt
 application = Flask(__name__)
 
 class BacktestError(Exception):
-    """Custom exception for backtest errors"""
     pass
 
 def run_backtest(config):
-    """Placeholder backtest function - implement your actual logic here"""
-    # For now, return dummy data to make the app work
     import matplotlib.pyplot as plt
     import numpy as np
     
-    # Create a simple dummy plot
     fig, ax = plt.subplots(figsize=(10, 6))
     x = np.linspace(0, 100, 100)
     y = np.cumsum(np.random.randn(100)) + 100
@@ -24,7 +20,6 @@ def run_backtest(config):
     ax.set_title('Backtest Results')
     ax.legend()
     
-    # Dummy stats
     stats = {
         'total_return': '15.2%',
         'max_drawdown': '-8.1%',

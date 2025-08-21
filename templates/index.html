@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Volatility Strategy Backtest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0; padding: 0; background: #f9f9f9;
+      color: #333;
+    }
+    .container {
+      display: flex;
+      max-width: 1000px;
+      margin: 40px auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 500px;
+    }
+    .left-panel, .right-panel {
+      padding: 30px;
+      box-sizing: border-box;
+    }
+    .left-panel {
+      flex: 1;
+      border-right: 1px solid #ddd;
+    }
+    .right-panel {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 24px;
+      color: #2c3e50;
+    }
+    label {
+      display: block;
+      margin: 15px 0 6px;
+      font-weight: 600;
+    }
+    input[type="text"],
+    input[type="date"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+    }
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="number"]:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background-color: #3498db;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .error {
+      background: #ffe6e6;
+      color: #cc0000;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .results-section {
+      width: 100%;
+      text-align: center;
+    }
+    .results-section h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+    .results-section img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      margin-bottom: 20px;
+    }
+    .results-section ul {
+      list-style: none;
+      padding: 0;
+      font-size: 16px;
+      text-align: left;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .results-section ul li {
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #34495e;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        max-width: 95%;
+        margin: 20px auto;
+      }
+      .left-panel, .right-panel {
+        border-right: none;
+        padding: 20px 15px;
+      }
+      .right-panel {
+        margin-top: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <h1>Volatility Strategy Backtest</h1>
+
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <label for="trade_symbol">Trade Symbol</label>
+        <input type="text" id="trade_symbol" name="trade_symbol" placeholder="SPY" value="{{ request.form.trade_symbol or '' }}" required />
+
+        <label for="vol_symbol">Volatility Symbol</label>
+        <input type="text" id="vol_symbol" name="vol_symbol" placeholder="^VIX" value="{{ request.form.vol_symbol or '' }}" required />
+
+        <label for="start_date">Start Date</label>
+        <input type="date" id="start_date" name="start_date" value="{{ request.form.start_date or '' }}" required />
+
+        <label for="end_date">End Date</label>
+        <input type="date" id="end_date" name="end_date" value="{{ request.form.end_date or '' }}" required />
+
+        <label for="vol_threshold">Volatility Threshold</label>
+        <input type="number" id="vol_threshold" name="vol_threshold" step="0.1" value="{{ request.form.vol_threshold or 20 }}" required />
+
+        <label for="initial_capital">Initial Capital ($)</label>
+        <input type="number" id="initial_capital" name="initial_capital" step="1" value="{{ request.form.initial_capital or 10000 }}" required />
+
+        <button type="submit">Run Backtest</button>
+      </form>
+    </div>
+
+    <div class="right-panel">
+      {% if plot_url %}
+        <div class="results-section">
+          <h2>Backtest Results</h2>
+          <img src="{{ plot_url }}" alt="Equity Curve Plot" />
+          <h3>Summary Statistics</h3>
+          <ul>
+            {% for key, value in stats.items() %}
+              <li><strong>{{ key }}:</strong> {{ value }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p>Enter inputs and run the backtest to see results here.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
